@@ -102,7 +102,7 @@ export default function KanbanCard({ card }: Props) {
         </div>
 
         {/* Move arrows */}
-        <div className="flex justify-between mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex justify-between mt-2">
           <button
             className={`text-xs px-1.5 py-0.5 rounded transition-colors ${prevList ? 'text-gray-400 hover:text-gray-100 hover:bg-gray-600' : 'text-gray-700 cursor-default'}`}
             onClick={handleMoveLeft}
