@@ -114,6 +114,7 @@ export const useBoardStore = create<BoardState>()(
           checklists: [],
           comments: [],
           attachments: [],
+          docPageIds: [],
           position: listCards.length,
           createdAt: new Date().toISOString(),
         }

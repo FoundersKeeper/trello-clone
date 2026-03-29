@@ -1,7 +1,9 @@
 import { useState, useRef } from 'react'
 import { format, isPast, parseISO } from 'date-fns'
 import { de } from 'date-fns/locale'
+import { useNavigate } from 'react-router-dom'
 import { useBoardStore } from '../../store/boardStore'
+import { useDocStore } from '../../store/docStore'
 import { LABEL_COLORS } from '../../types'
 import type { Card, Label, Checklist, ChecklistItem, Attachment } from '../../types'
 import { nanoid } from '../../utils/nanoid'
@@ -26,6 +28,8 @@ export default function CardModal({ card, onClose }: Props) {
   const lists = useBoardStore(s => s.lists)
   // Always read fresh card from store so updates reflect immediately
   const liveCard = useBoardStore(s => s.cards.find(c => c.id === card.id)) ?? card
+  const allDocPages = useDocStore(s => s.pages)
+  const navigate = useNavigate()
 
   const [editingTitle, setEditingTitle] = useState(false)
   const [title, setTitle] = useState(liveCard.title)
@@ -39,6 +43,8 @@ export default function CardModal({ card, onClose }: Props) {
   const [newItemText, setNewItemText] = useState<Record<string, string>>({})
   const [attachError, setAttachError] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [docSearch, setDocSearch] = useState('')
+  const [showDocSearch, setShowDocSearch] = useState(false)
 
   const listName = lists.find(l => l.id === liveCard.listId)?.title ?? ''
   const isOverdue = liveCard.dueDate && !liveCard.completionDate && isPast(parseISO(liveCard.dueDate))
@@ -435,6 +441,86 @@ export default function CardModal({ card, onClose }: Props) {
               >
                 Datei hierher ziehen oder klicken zum Auswählen (max. 5 MB)
               </button>
+            )}
+          </section>
+
+          {/* Docs */}
+          <section>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Docs-Seiten</p>
+              <button
+                className="text-xs text-blue-400 hover:text-blue-300 transition-colors"
+                onClick={() => setShowDocSearch(p => !p)}
+              >
+                + Seite verknüpfen
+              </button>
+            </div>
+
+            {/* Linked pages */}
+            {(liveCard.docPageIds ?? []).length > 0 && (
+              <div className="flex flex-col gap-1.5 mb-2">
+                {(liveCard.docPageIds ?? []).map(pid => {
+                  const page = allDocPages.find(p => p.id === pid)
+                  if (!page) return null
+                  return (
+                    <div key={pid} className="flex items-center gap-2 bg-gray-700 rounded-lg px-3 py-1.5 border border-gray-600 group/doc">
+                      <span className="text-xs">📄</span>
+                      <button
+                        className="flex-1 text-sm text-blue-400 hover:text-blue-300 text-left truncate transition-colors"
+                        onClick={() => { onClose(); navigate(`/docs/${page.id}`) }}
+                      >
+                        {page.title}
+                      </button>
+                      <button
+                        className="text-gray-600 hover:text-red-400 text-xs opacity-0 group-hover/doc:opacity-100 transition-all"
+                        onClick={() => updateCard(liveCard.id, { docPageIds: (liveCard.docPageIds ?? []).filter(id => id !== pid) })}
+                      >✕</button>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* Search dropdown */}
+            {showDocSearch && (
+              <div className="border border-gray-600 rounded-lg p-2 bg-gray-900/50 flex flex-col gap-1.5">
+                <input
+                  className="w-full rounded border border-gray-600 bg-gray-700 text-gray-100 px-2 py-1.5 text-sm placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  placeholder="Seite suchen…"
+                  value={docSearch}
+                  onChange={e => setDocSearch(e.target.value)}
+                  autoFocus
+                />
+                <div className="flex flex-col gap-0.5 max-h-40 overflow-y-auto">
+                  {allDocPages
+                    .filter(p =>
+                      p.title.toLowerCase().includes(docSearch.toLowerCase()) &&
+                      !(liveCard.docPageIds ?? []).includes(p.id)
+                    )
+                    .map(p => (
+                      <button
+                        key={p.id}
+                        className="text-left text-sm text-gray-300 hover:bg-gray-700 px-2 py-1.5 rounded transition-colors truncate"
+                        onClick={() => {
+                          updateCard(liveCard.id, { docPageIds: [...(liveCard.docPageIds ?? []), p.id] })
+                          setDocSearch('')
+                          setShowDocSearch(false)
+                        }}
+                      >
+                        📄 {p.title}
+                      </button>
+                    ))
+                  }
+                  {allDocPages.filter(p =>
+                    p.title.toLowerCase().includes(docSearch.toLowerCase()) &&
+                    !(liveCard.docPageIds ?? []).includes(p.id)
+                  ).length === 0 && (
+                    <p className="text-xs text-gray-600 px-2 py-2 text-center">
+                      {allDocPages.length === 0 ? 'Noch keine Docs-Seiten vorhanden.' : 'Keine passenden Seiten gefunden.'}
+                    </p>
+                  )}
+                </div>
+              </div>
             )}
           </section>
 

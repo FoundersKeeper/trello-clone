@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { format, isPast, parseISO } from 'date-fns'
@@ -6,6 +7,7 @@ import { de } from 'date-fns/locale'
 import type { Card } from '../../types'
 import CardModal from '../card/CardModal'
 import { useBoardStore } from '../../store/boardStore'
+import { useDocStore } from '../../store/docStore'
 
 interface Props {
   card: Card
@@ -13,7 +15,9 @@ interface Props {
 
 export default function KanbanCard({ card }: Props) {
   const [showModal, setShowModal] = useState(false)
+  const navigate = useNavigate()
   const lists = useBoardStore(s => s.lists)
+  const allDocPages = useDocStore(s => s.pages)
   const cards = useBoardStore(s => s.cards)
   const moveCard = useBoardStore(s => s.moveCard)
 
@@ -100,6 +104,26 @@ export default function KanbanCard({ card }: Props) {
             </span>
           )}
         </div>
+
+        {/* Doc links */}
+        {(card.docPageIds ?? []).length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-2">
+            {(card.docPageIds ?? []).map(pid => {
+              const page = allDocPages.find(p => p.id === pid)
+              if (!page) return null
+              return (
+                <button
+                  key={pid}
+                  className="text-xs text-blue-400 hover:text-blue-300 bg-blue-900/20 hover:bg-blue-900/40 px-1.5 py-0.5 rounded transition-colors truncate max-w-[120px]"
+                  title={`Docs: ${page.title}`}
+                  onClick={e => { e.stopPropagation(); navigate(`/docs/${page.id}`) }}
+                >
+                  📄 {page.title}
+                </button>
+              )
+            })}
+          </div>
+        )}
 
         {/* Move arrows */}
         <div className="flex justify-between mt-2">

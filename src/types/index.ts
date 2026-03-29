@@ -46,8 +46,26 @@ export interface Card {
   comments: Comment[]
   attachments: Attachment[]
   templateId?: string
+  docPageIds: string[]
   position: number
   createdAt: string
+}
+
+// Docs
+export interface DocFolder {
+  id: string
+  title: string
+  pageIds: string[]
+}
+
+export interface DocPage {
+  id: string
+  title: string
+  content: string
+  folderId?: string
+  linkedPageIds: string[]
+  createdAt: string
+  updatedAt: string
 }
 
 export interface List {

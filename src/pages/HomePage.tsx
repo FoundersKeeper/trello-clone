@@ -25,9 +25,14 @@ export default function HomePage() {
             </div>
             <span className="font-bold text-lg text-white">Trello Clone</span>
           </div>
-          <Link to="/planner" className="text-sm text-blue-400 hover:text-blue-300 font-medium transition-colors">
-            📅 Planner
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link to="/planner" className="text-sm text-blue-400 hover:text-blue-300 font-medium transition-colors">
+              📅 Planner
+            </Link>
+            <Link to="/docs" className="text-sm text-blue-400 hover:text-blue-300 font-medium transition-colors">
+              📝 Docs
+            </Link>
+          </div>
         </div>
       </header>
 
