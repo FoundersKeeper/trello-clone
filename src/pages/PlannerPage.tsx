@@ -2,8 +2,9 @@ import { Link } from 'react-router-dom'
 import { format, parseISO, isToday, isTomorrow, isPast, startOfDay, addDays } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { useBoardStore } from '../store/boardStore'
+import type { Card } from '../types'
 
-function groupCardsByDate(cards: ReturnType<ReturnType<typeof useBoardStore>['getAllCardsWithDueDate']>) {
+function groupCardsByDate(cards: Card[]) {
   const groups: Record<string, typeof cards> = {}
   for (const card of cards) {
     const key = card.dueDate!.slice(0, 10)

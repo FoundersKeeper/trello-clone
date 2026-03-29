@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { nanoid } from '../utils/nanoid'
-import type { Board, List, Card, Label } from '../types'
+import type { Board, List, Card } from '../types'
 
 interface BoardState {
   boards: Board[]
